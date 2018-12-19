@@ -5,7 +5,7 @@ import InputCustomizado from './componentes/InputCustmizado';
 class FormularioAutor extends Component {
     constructor() {
         super();
-        this.state = { lista: [], nome: '', email: '', senha: '' };
+        this.state = {nome: '', email: '', senha: '' };
         this.enviaForm = this.enviaForm.bind(this);
         this.setNome = this.setNome.bind(this);
         this.setEmail = this.setEmail.bind(this);
@@ -21,8 +21,7 @@ class FormularioAutor extends Component {
             type: 'post', // tipo de requisicao
             data: JSON.stringify({ nome: this.state.nome, email: this.state.email, senha: this.state.senha }),    //uma string
             success: function (resposta) {
-                console.log('enviado com sucesso')
-                this.setState({ lista: resposta });
+               this.props.callbackAtualizaListagem(resposta);
             }.bind(this),
             error: function (resposta) {
                 console.log('erro')
@@ -69,20 +68,7 @@ class FormularioAutor extends Component {
 
 class TabelaAutores extends Component {
     
-  constructor() {
-    super();
-    this.state = {lista: []};
-  }
-
-  componentDidMount() {
-    $.ajax({
-      url: "http://cdc-react.herokuapp.com/api/autores",
-      dataType: 'json',
-      success: function (resposta) {
-        this.setState({ lista: resposta });
-      }.bind(this)
-    });
-  }
+ 
 
     render() {
         return (
@@ -96,7 +82,7 @@ class TabelaAutores extends Component {
                     </thead>
                     <tbody>
                         {
-                            this.state.lista.map(function (autor) {
+                            this.props.lista.map(function (autor) {
                                 return (
                                     <tr key={autor.id}>
                                         <td>{autor.nome}</td>
@@ -113,12 +99,33 @@ class TabelaAutores extends Component {
 }
 
 export default class AutorBox extends Component{
-    render(){
+    
+    constructor() {
+        super();
+        this.state = {lista: []};
+        this.atualizaListagem = this.atualizaListagem.bind(this);
+      }
+    
+      componentDidMount() {
+        $.ajax({
+          url: "http://cdc-react.herokuapp.com/api/autores",
+          dataType: 'json',
+          success: function (resposta) {
+            this.setState({ lista: resposta });
+          }.bind(this)
+        });
+      }
+
+      atualizaListagem(novaListagem){
+          this.setState = ({lista:novaListagem});
+      }
+
+    render(){        
         return(
         <div>
-            <FormularioAutor/>
+            <FormularioAutor callbackAtualizaListagem={this.atualizaListagem}/>
             <TabelaAutores lista={this.state.lista}/>
-            </div>
-        )
+        </div>
+        );
     }
 }
